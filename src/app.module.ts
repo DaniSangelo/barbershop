@@ -6,6 +6,9 @@ import { AppService } from './app.service';
 import { CustomerModule } from './customer/customer.module';
 import { BarberModule } from './barber/barber.module';
 import { BsserviceModule } from './bsservice/bsservice.module';
+import { UserController } from './users/user.controller';
+import { UserModule } from './users/user.module';
+import { UserService } from './users/users.service';
 
 @Module({
 	imports: [
@@ -14,6 +17,7 @@ import { BsserviceModule } from './bsservice/bsservice.module';
 		CustomerModule,
 		BarberModule,
 		BsserviceModule,
+		UserModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
