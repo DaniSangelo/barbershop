@@ -9,6 +9,7 @@ import { BsserviceModule } from './bsservice/bsservice.module';
 import { UserController } from './users/user.controller';
 import { UserModule } from './users/user.module';
 import { UserService } from './users/users.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
 	imports: [
@@ -18,6 +19,7 @@ import { UserService } from './users/users.service';
 		BarberModule,
 		BsserviceModule,
 		UserModule,
+		AuthModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
