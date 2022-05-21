@@ -5,7 +5,7 @@ import {
 	Entity,
 	PrimaryGeneratedColumn,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+import * as genHash from '../../helpers/generateHash.helper';
 
 @Entity({
 	name: 'User',
@@ -31,6 +31,6 @@ export class User {
 
 	@BeforeInsert()
 	hashPassword() {
-		this.password = bcrypt.hashSync(this.password, 10);
+		this.password = genHash.generateHash(this.password, 10);
 	}
 }

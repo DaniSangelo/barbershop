@@ -6,4 +6,5 @@ export class UpdateUserDto {
 	// @IsNotEmpty()
 	// @Matches(RegexHelper.password, { message: MessagesHelper.INVALID_PASSWORD })
 	password?: string;
+	updatedAt?: Date;
 }

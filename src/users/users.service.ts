@@ -4,6 +4,7 @@ import { FindConditions, FindOneOptions, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
+import * as genHash from '../helpers/generateHash.helper';
 
 @Injectable()
 export class UserService {
@@ -51,15 +52,25 @@ export class UserService {
 	async update(id: number, updateUserDto: UpdateUserDto) {
 		const user = await this.userRepository.findOne(id);
 		if (!user) throw new NotFoundException(`User not found`);
+		updateUserDto.updatedAt = this.dtNow();
+		updateUserDto.password = genHash.generateHash(
+			updateUserDto.password,
+			10,
+		);
 		this.userRepository.merge(user, updateUserDto);
-		return this.userRepository.save(user);
+		await this.userRepository.save(user);
+		return;
 	}
 
 	async remove(id: number) {
 		const user = await this.userRepository.findOne(id);
 		if (!user) throw new NotFoundException(`User not found`);
-		user.deletedAt = new Date();
+		user.deletedAt = this.dtNow();
 		await this.userRepository.save(user);
 		return;
+	}
+
+	private dtNow() {
+		return new Date();
 	}
 }
