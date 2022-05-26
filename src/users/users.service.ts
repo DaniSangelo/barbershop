@@ -1,19 +1,37 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+	forwardRef,
+	HttpException,
+	HttpStatus,
+	Inject,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindConditions, FindOneOptions, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import * as genHash from '../helpers/generateHash.helper';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
 	constructor(
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
+		@Inject(forwardRef(() => AuthService))
+		private readonly authService: AuthService
 	) {}
 
 	async create(createUserDto: CreateUserDto) {
+		const userExists = await this.findByEmail(createUserDto.email);
+
+		if (userExists)
+			throw new HttpException(
+				'User already exist',
+				HttpStatus.BAD_REQUEST,
+			);
+
 		const user = this.userRepository.create(createUserDto);
 		await this.userRepository.save(user);
 		return;
@@ -72,5 +90,30 @@ export class UserService {
 
 	private dtNow() {
 		return new Date();
+	}
+
+	async saveToken(userId: number, token: string) {
+		await this.userRepository.update(
+			{
+				id: userId,
+			},
+			{
+				token: token,
+			},
+		);
+		return;
+	}
+
+	async refreshToken(oldToken: string) {
+		let user = await this.userRepository.findOne({ token: oldToken });
+		if (user) {
+			return this.authService.login(user);
+		}
+		return new HttpException(
+			{
+				errormessage: 'Invalid token',
+			},
+			HttpStatus.UNAUTHORIZED,
+		);
 	}
 }

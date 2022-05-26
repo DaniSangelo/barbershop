@@ -7,11 +7,13 @@ import {
 	Param,
 	Delete,
 	UseGuards,
+	Put,
 } from '@nestjs/common';
 import { UserService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { RefreshTokenDto } from 'src/users/dto/refresh-token.dto';
 
 @Controller('users')
 export class UserController {
@@ -44,5 +46,11 @@ export class UserController {
 	@UseGuards(AuthGuard('jwt'))
 	remove(@Param('id') id: string) {
 		return this.userService.remove(+id);
+	}
+
+	@Put('refresh-token')
+	async refresh(@Body() data: RefreshTokenDto) {
+		let token = await this.userService.refreshToken(data.oldToken);
+		return token;
 	}
 }

@@ -29,6 +29,9 @@ export class User {
 	@Column({ name: 'dtDeletedAt', type: 'datetime' })
 	deletedAt: Date;
 
+	@Column({ name: 'strToken', type: 'varchar', length: '1000' })
+	token: string;
+
 	@BeforeInsert()
 	hashPassword() {
 		this.password = genHash.generateHash(this.password, 10);

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { User } from 'src/users/entities/user.entity';
 import { UserService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class AuthService {
 	constructor(
+		@Inject(forwardRef(() => UserService))
 		private readonly userService: UserService,
 		private readonly jwtService: JwtService,
 	) {}
@@ -27,8 +28,10 @@ export class AuthService {
 
 	async login(user: User) {
 		const payload = { sub: user.id, email: user.email };
+		const token = this.jwtService.sign(payload);
+		await this.userService.saveToken(user.id, token);
 		return {
-			token: this.jwtService.sign(payload),
+			token: token,
 		};
 	}
 }
