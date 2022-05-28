@@ -7,12 +7,16 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindConditions, FindOneOptions, Repository } from 'typeorm';
+import {
+	Connection,
+	Repository,
+} from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import * as genHash from '../helpers/generateHash.helper';
 import { AuthService } from 'src/auth/auth.service';
+import { Customer } from 'src/customer/entities/customer.entity';
 
 @Injectable()
 export class UserService {
@@ -21,6 +25,7 @@ export class UserService {
 		private readonly userRepository: Repository<User>,
 		@Inject(forwardRef(() => AuthService))
 		private readonly authService: AuthService,
+		private connection: Connection,
 	) {}
 
 	async create(createUserDto: CreateUserDto) {
@@ -28,8 +33,23 @@ export class UserService {
 
 		if (userExists) throw new BadRequestException('User already exist');
 
-		const user = this.userRepository.create(createUserDto);
-		await this.userRepository.save(user);
+		const queryRunner = this.connection.createQueryRunner();
+		await queryRunner.connect();
+		await queryRunner.startTransaction();
+
+		try {
+			let user = this.userRepository.create(createUserDto);
+			user = await queryRunner.manager.save(user);
+			const customer = new Customer();
+			customer.user = user;
+			await queryRunner.manager.save(customer);
+			await queryRunner.commitTransaction();
+		} catch (error) {
+			await queryRunner.rollbackTransaction();
+			return error;
+		} finally {
+			await queryRunner.release();
+		}
 
 		return;
 	}
@@ -42,7 +62,7 @@ export class UserService {
 
 	async findByEmail(email: string): Promise<User> {
 		const user = await this.userRepository.findOne({ email });
-		if (!user) throw new NotFoundException();
+		//if (!user) throw new NotFoundException();
 
 		return user;
 	}

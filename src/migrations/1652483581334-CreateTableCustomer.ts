@@ -5,7 +5,7 @@ export class CreateTableCustomer1652483581334 implements MigrationInterface {
 		await queryRunner.query(
 			`CREATE TABLE IF NOT EXISTS Customer (
 				nCustomerID INT AUTO_INCREMENT,
-				strName VARCHAR(15) NOT NULL,
+				strName VARCHAR(15) NULL,
 				strLastName VARCHAR(40) NULL,
 				strPhoneNumber CHAR(15) NULL,
 				dtBirthDay DATE NULL,
