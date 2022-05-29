@@ -62,7 +62,6 @@ export class UserService {
 
 	async findByEmail(email: string): Promise<User> {
 		const user = await this.userRepository.findOne({ email });
-		//if (!user) throw new NotFoundException();
 
 		return user;
 	}
@@ -78,7 +77,6 @@ export class UserService {
 		const user = await this.userRepository.findOne(id);
 		if (!user) throw new NotFoundException(`User not found`);
 
-		updateUserDto.updatedAt = this.dtNow();
 		updateUserDto.password = genHash.generateHash(
 			updateUserDto.password,
 			10,

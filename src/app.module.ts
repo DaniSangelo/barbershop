@@ -10,6 +10,7 @@ import { UserController } from './users/user.controller';
 import { UserModule } from './users/user.module';
 import { UserService } from './users/users.service';
 import { AuthModule } from './auth/auth.module';
+import { AppointmentModule } from './appointment/appointment.module';
 
 @Module({
 	imports: [
@@ -20,6 +21,7 @@ import { AuthModule } from './auth/auth.module';
 		BsserviceModule,
 		UserModule,
 		AuthModule,
+		AppointmentModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

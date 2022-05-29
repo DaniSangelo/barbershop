@@ -1,5 +1,7 @@
 import {
 	BeforeInsert,
+	BeforeRemove,
+	BeforeUpdate,
 	Column,
 	DeleteDateColumn,
 	Entity,
@@ -35,5 +37,10 @@ export class User {
 	@BeforeInsert()
 	hashPassword() {
 		this.password = genHash.generateHash(this.password, 10);
+	}
+
+	@BeforeUpdate()
+	updateDate() {
+		this.updatedAt = new Date()
 	}
 }
