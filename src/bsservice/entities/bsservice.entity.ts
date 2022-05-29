@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Scheduledservice } from 'src/scheduledservice/entities/scheduledservice.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({
 	name: 'BarbershopService',
@@ -24,4 +25,10 @@ export class Bsservice {
 
 	@Column({ name: 'dtUpdatedAt', type: 'datetime' })
 	updatedAt: Date;
+
+	@OneToMany(
+		() => Scheduledservice,
+		(scheduledService) => scheduledService.barbershopService,
+	)
+	scheduledService: Scheduledservice[];
 }

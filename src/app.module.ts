@@ -11,6 +11,7 @@ import { UserModule } from './users/user.module';
 import { UserService } from './users/users.service';
 import { AuthModule } from './auth/auth.module';
 import { AppointmentModule } from './appointment/appointment.module';
+import { ScheduledserviceModule } from './scheduledservice/scheduledservice.module';
 
 @Module({
 	imports: [
@@ -22,6 +23,7 @@ import { AppointmentModule } from './appointment/appointment.module';
 		UserModule,
 		AuthModule,
 		AppointmentModule,
+		ScheduledserviceModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

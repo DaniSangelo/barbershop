@@ -8,5 +8,6 @@ import { Bsservice } from './entities/bsservice.entity';
 	imports: [TypeOrmModule.forFeature([Bsservice])],
 	controllers: [BsserviceController],
 	providers: [BsserviceService],
+	exports: [BsserviceService],
 })
 export class BsserviceModule {}

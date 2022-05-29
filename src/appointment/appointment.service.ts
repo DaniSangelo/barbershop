@@ -1,6 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { BsserviceService } from 'src/bsservice/bsservice.service';
+import { Bsservice } from 'src/bsservice/entities/bsservice.entity';
+import { CreateScheduledserviceDto } from 'src/scheduledservice/dto/create-scheduledservice.dto';
+import { Scheduledservice } from 'src/scheduledservice/entities/scheduledservice.entity';
+import { ScheduledserviceService } from 'src/scheduledservice/scheduledservice.service';
+import { Connection, EntityManager, Repository } from 'typeorm';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { Appointment } from './entities/appointment.entity';
@@ -11,10 +16,12 @@ export class AppointmentService {
 		@InjectRepository(Appointment)
 		private readonly appointmentRepository: Repository<Appointment>,
 		private manager: EntityManager,
+		private readonly bsService: BsserviceService,
+		private readonly scheduledservice: ScheduledserviceService,
 	) {}
 
 	async create(createAppointmentDto: CreateAppointmentDto) {
-		const appointment =
+		let appointment =
 			this.appointmentRepository.create(createAppointmentDto);
 
 		const isAvailable = await this.DateHourIsAvailable(
@@ -28,9 +35,24 @@ export class AppointmentService {
 				'The chosen date and time are not available',
 			);
 
-		console.log(createAppointmentDto);
+		let services =
+			createAppointmentDto.scheduledServices &&
+			(await Promise.all(
+				createAppointmentDto.scheduledServices.map((service) =>
+					this.preloadBarberServiceById(service.id),
+				),
+			));
+		appointment = await this.appointmentRepository.save(appointment);
 
-		return this.appointmentRepository.save(appointment);
+		services.forEach(async (service) => {
+			let scheduledservice = new Scheduledservice();
+			scheduledservice.appointment = appointment;
+			scheduledservice.barbershopService = service;
+			scheduledservice.fPrice = service.price;
+
+			await this.scheduledservice.create(scheduledservice);
+		});
+		return;
 	}
 
 	findAll() {
@@ -66,5 +88,14 @@ export class AppointmentService {
 		);
 
 		return qtdAppointments.Qtd == 0 ? true : false;
+	}
+
+	private async preloadBarberServiceById(id: number): Promise<Bsservice> {
+		const service = await this.bsService.findOne(id);
+
+		if (service) {
+			return service;
+		}
+		return;
 	}
 }

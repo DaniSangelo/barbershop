@@ -1,5 +1,6 @@
 import { Barber } from 'src/barber/entities/barber.entity';
 import { Customer } from 'src/customer/entities/customer.entity';
+import { Scheduledservice } from 'src/scheduledservice/entities/scheduledservice.entity';
 import internal from 'stream';
 import {
 	BeforeInsert,
@@ -8,6 +9,7 @@ import {
 	Entity,
 	JoinColumn,
 	ManyToOne,
+	OneToMany,
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm';
@@ -45,6 +47,12 @@ export class Appointment {
 
 	@Column({ name: 'dtUpdatedAt', type: 'datetime' })
 	dtUpdatedAt: Date;
+
+	@OneToMany(
+		() => Scheduledservice,
+		(scheduledService) => scheduledService.appointment,
+	)
+	scheduledService: Scheduledservice[];
 
 	@BeforeInsert()
 	@BeforeUpdate()
