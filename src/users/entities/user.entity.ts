@@ -36,7 +36,7 @@ export class User {
 
 	@BeforeInsert()
 	hashPassword() {
-		this.password = genHash.generateHash(this.password, 10);
+		this.password = genHash.generateHashHelper(this.password, 10);
 	}
 
 	@BeforeUpdate()

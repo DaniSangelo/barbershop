@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { CreateBsserviceDto } from './dto/create-bsservice.dto';
 import { UpdateBsserviceDto } from './dto/update-bsservice.dto';
 import { Bsservice } from './entities/bsservice.entity';
+import { dateNowHelper } from 'src/helpers/utils.helper';
 
 @Injectable()
 export class BsserviceService {
@@ -14,7 +15,7 @@ export class BsserviceService {
 
 	async create(createBsserviceDto: CreateBsserviceDto) {
 		const service = this.bsServiceRepository.create(createBsserviceDto);
-		service.updatedAt = new Date();
+		service.updatedAt = dateNowHelper.now;
 		await this.bsServiceRepository.save(service);
 		return;
 	}
@@ -28,10 +29,9 @@ export class BsserviceService {
 	}
 
 	async update(id: number, updateBsserviceDto: UpdateBsserviceDto) {
-		const dateNow = new Date();
 		const service = await this.bsServiceRepository.preload({
 			id,
-			updatedAt: dateNow,
+			updatedAt: dateNowHelper.now,
 			...updateBsserviceDto,
 		});
 

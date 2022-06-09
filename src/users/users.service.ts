@@ -74,7 +74,7 @@ export class UserService {
 		const user = await this.userRepository.findOne(id);
 		if (!user) throw new NotFoundException(`User not found`);
 
-		updateUserDto.password = genHash.generateHash(
+		updateUserDto.password = genHash.generateHashHelper(
 			updateUserDto.password,
 			10,
 		);
