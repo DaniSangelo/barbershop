@@ -3,7 +3,7 @@ export class CreateBsserviceDto {
 	serviceName: string;
 	serviceDescription: string;
 	price: number;
-	avgDuration: Date;
+	avgDuration: number;
 	isActive: boolean;
 	updatedAt: Date;
 }

@@ -17,8 +17,8 @@ export class Bsservice {
 	@Column({ name: 'fPrice', type: 'decimal', precision: 5 })
 	price: number;
 
-	@Column({ name: 'dtAvgDuration', type: 'time' })
-	avgDuration: Date;
+	@Column({ name: 'nAvgDuration', type: 'tinyint' })
+	avgDuration: number;
 
 	@Column({ name: 'bIsActive', type: 'tinyint' })
 	isActive: boolean;

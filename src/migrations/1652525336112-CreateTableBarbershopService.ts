@@ -3,17 +3,6 @@ import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 export class CreateTableBarbershopService1652525336112
 	implements MigrationInterface
 {
-	// CREATE TABLE `BarbershopService` (
-	// 	nBarbershopServiceID INT AUTO_INCREMENT,
-	// 	strName VARCHAR(40) NOT NULL,
-	// 	strDescription VARCHAR(500) NULL,
-	// 	fPrice DECIMAL(5, 2) NOT NULL,
-	// 	dtAvgDuration TIME NULL,
-	// 	bIsActive TINYINT NOT NULL DEFAULT 1,
-	// 	dtCreatedAt DATETIME NOT NULL DEFAULT NOW(),
-	// 	dtUpdatedAt DATETIME NOT NULL,
-	// 	CONSTRAINT PK_Service_nBarbershopServiceID PRIMARY KEY (nBarbershopServiceID)
-	// );
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.createTable(
 			new Table({

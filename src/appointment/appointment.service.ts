@@ -24,7 +24,20 @@ export class AppointmentService {
 		let appointment =
 			this.appointmentRepository.create(createAppointmentDto);
 
+		let services =
+			createAppointmentDto.scheduledServices &&
+			(await Promise.all(
+				createAppointmentDto.scheduledServices.map((service) =>
+					this.preloadBarberServiceById(service.id),
+				),
+			));
+
+		let totalDuration = services.reduce((acc, service) => {
+			return acc + service.avgDuration;
+		}, 0);
+
 		const isAvailable = await this.DateHourIsAvailable(
+			totalDuration,
 			appointment.dtAppointment,
 			appointment.dtHourAppointment,
 			appointment.barberId,
@@ -35,13 +48,6 @@ export class AppointmentService {
 				'The chosen date and time are not available',
 			);
 
-		let services =
-			createAppointmentDto.scheduledServices &&
-			(await Promise.all(
-				createAppointmentDto.scheduledServices.map((service) =>
-					this.preloadBarberServiceById(service.id),
-				),
-			));
 		appointment = await this.appointmentRepository.save(appointment);
 
 		services.forEach(async (service) => {
@@ -72,22 +78,24 @@ export class AppointmentService {
 	}
 
 	private async DateHourIsAvailable(
+		totalDuration: number,
 		date: Date,
 		hour: Date,
 		barberId: number,
 	): Promise<boolean> {
 		const [qtdAppointments] = await this.manager.query(
 			`SELECT
-			COUNT(1) AS Qtd
-		FROM Appointment
-		WHERE nStatus = 1
-			AND dtAppointment = ?
-			AND dtHourAppointment = ?
-			AND nBarberID = ?`,
-			[date, hour, barberId],
+			DateHourIsAvailable
+			(
+				?,
+				?,
+				?,
+				?
+			) as IsAvailable;`,
+			[totalDuration, date, hour, barberId],
 		);
 
-		return qtdAppointments.Qtd == 0 ? true : false;
+		return qtdAppointments.IsAvailable == 0 ? true : false;
 	}
 
 	private async preloadBarberServiceById(id: number): Promise<Bsservice> {
