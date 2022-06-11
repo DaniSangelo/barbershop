@@ -1,11 +1,21 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BsserviceService } from 'src/bsservice/bsservice.service';
 import { Bsservice } from 'src/bsservice/entities/bsservice.entity';
 import { CreateScheduledserviceDto } from 'src/scheduledservice/dto/create-scheduledservice.dto';
 import { Scheduledservice } from 'src/scheduledservice/entities/scheduledservice.entity';
 import { ScheduledserviceService } from 'src/scheduledservice/scheduledservice.service';
-import { getConnection, EntityManager, Repository, getManager } from 'typeorm';
+import {
+	getConnection,
+	EntityManager,
+	Repository,
+	getManager,
+	createQueryBuilder,
+} from 'typeorm';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { Appointment } from './entities/appointment.entity';
@@ -57,7 +67,7 @@ export class AppointmentService {
 					let scheduledservice = new Scheduledservice();
 					scheduledservice.appointmentId = appointmentId;
 					scheduledservice.barbershopServiceId = service.id;
-					scheduledservice.fPrice = service.price;
+					scheduledservice.price = service.price;
 					await manager.save(scheduledservice);
 				});
 			} catch (error) {
@@ -69,11 +79,35 @@ export class AppointmentService {
 	}
 
 	async findAppointmentsByDate(appointmentDate: string) {
-		return this.appointmentRepository.find({
-			where: {
-				dtAppointment: appointmentDate,
-			},
-		});
+		try {
+			const appointmentDetails = await createQueryBuilder(
+				'Appointment',
+				'a',
+			)
+				.innerJoinAndSelect('Barber', 'b', 'b.id = a.barberId')
+				.innerJoinAndSelect('Customer', 'c', 'a.customerId = c.id')
+				.innerJoinAndSelect(
+					'Scheduledservice',
+					'sc',
+					'sc.appointmentId = a.id',
+				)
+				.innerJoinAndSelect(
+					'Bsservice',
+					'bs',
+					'bs.id = sc.barbershopServiceId',
+				)
+				.select(
+					'b.firstName, b.lastName, b.phoneNumber, a.dtAppointment, a.dtHourAppointment, bs.serviceName, bs.avgDuration as duracao',
+				)
+				.where('a.dtAppointment = :dtAppointment', {
+					dtAppointment: appointmentDate,
+				})
+				.orderBy('a.dtAppointment, a.dtHourAppointment')
+				.getRawMany();
+			return appointmentDetails;
+		} catch (error) {
+			throw new InternalServerErrorException(error.message);
+		}
 	}
 
 	update(id: number, updateAppointmentDto: UpdateAppointmentDto) {

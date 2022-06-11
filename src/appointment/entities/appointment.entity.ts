@@ -1,5 +1,6 @@
 import { Barber } from 'src/barber/entities/barber.entity';
 import { Customer } from 'src/customer/entities/customer.entity';
+import { dateNowHelper } from 'src/helpers/utils.helper';
 import {
 	BeforeInsert,
 	BeforeUpdate,
@@ -39,6 +40,6 @@ export class Appointment {
 	@BeforeInsert()
 	@BeforeUpdate()
 	updatedAt() {
-		this.dtUpdatedAt = new Date();
+		this.dtUpdatedAt = dateNowHelper.now;
 	}
 }
