@@ -1,3 +1,6 @@
+This is my first project in NestJS. It's not perfect yet, but this is just the first step.<br>
+<strong>Project Name:</strong> BarberShop Application
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
 </p>
