@@ -22,5 +22,5 @@ export class Scheduledservice {
 	barbershopServiceId: number;
 
 	@Column({ name: 'fPrice', type: 'decimal', precision: 5 })
-	fPrice: number;
+	price: number;
 }
