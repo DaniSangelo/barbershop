@@ -1,10 +1,15 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { createQueryBuilder, Repository } from 'typeorm';
+import { createQueryBuilder, QueryBuilder, Repository } from 'typeorm';
 import { CreateBsserviceDto } from './dto/create-bsservice.dto';
 import { UpdateBsserviceDto } from './dto/update-bsservice.dto';
 import { Bsservice } from './entities/bsservice.entity';
 import { dateNowHelper } from 'src/helpers/utils.helper';
+import { createQuery } from 'mysql2/typings/mysql/lib/Connection';
 
 @Injectable()
 export class BsserviceService {
@@ -23,8 +28,8 @@ export class BsserviceService {
 	async findAll() {
 		try {
 			const bsService = await createQueryBuilder('Bsservice', 'bs')
-			.select(
-				'bs.serviceName, bs.serviceDescription, bs.price, bs.avgDuration',
+				.select(
+					'bs.id, bs.serviceName, bs.serviceDescription, bs.price, bs.avgDuration',
 				)
 				.cache('services', 60000)
 				.getRawMany();
@@ -34,8 +39,14 @@ export class BsserviceService {
 		}
 	}
 
-	findOne(id: number) {
-		return this.bsServiceRepository.findOne(id);
+	async findOne(id: number) {
+		const bsService = await createQueryBuilder('Bsservice', 'bs')
+			.select(
+				'bs.id, bs.serviceName, bs.serviceDescription, bs.price, bs.avgDuration',
+			)
+			.where('bs.id = :id', { id: id })
+			.getRawOne();
+		return bsService;
 	}
 
 	async update(id: number, updateBsserviceDto: UpdateBsserviceDto) {
@@ -53,7 +64,7 @@ export class BsserviceService {
 	}
 
 	async remove(id: number) {
-		const service = await this.bsServiceRepository.findOne(id);
+		const service = await this.findOne(id);
 		if (!service)
 			throw new NotFoundException(`Barbershop service not found`);
 

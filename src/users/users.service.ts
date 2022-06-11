@@ -36,7 +36,7 @@ export class UserService {
 				let user = this.userRepository.create(createUserDto);
 				user = await manager.save(user);
 				const customer = new Customer();
-				customer.user = user;
+				customer.userId = user.id;
 				await manager.save(customer);
 			} catch (error) {
 				throw new InternalServerErrorException(error.message);

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { createQueryBuilder, Repository } from 'typeorm';
 import { CreateBarberDto } from './dto/create-barber.dto';
 import { UpdateBarberDto } from './dto/update-barber.dto';
 import { Barber } from './entities/barber.entity';
@@ -18,12 +18,21 @@ export class BarberService {
 		return;
 	}
 
-	findAll() {
-		return this.barberRepository.find();
+	async findAll() {
+		const barber = await createQueryBuilder('Barber', 'b')
+			.select('b.id, b.firstName, b.lastName, b.phoneNumber')
+			.cache('barber', 60000)
+			.getRawMany();
+
+		return barber;
 	}
 
 	async findOne(id: number) {
-		const barber = await this.barberRepository.findOne(id);
+		const barber = await createQueryBuilder('Barber', 'b')
+			.select('b.id, b.firstName, b.lastName, b.phoneNumber')
+			.where('b.id = :id', { id: id })
+			.getRawOne();
+
 		if (!barber) throw new NotFoundException(`Barber not found`);
 		return barber;
 	}
@@ -39,7 +48,7 @@ export class BarberService {
 	}
 
 	async remove(id: number) {
-		const barber = await this.barberRepository.findOne(id);
+		const barber = await this.findOne(id);
 		if (!barber) throw new NotFoundException(`Barber not found`);
 		await this.barberRepository.remove(barber);
 		return;

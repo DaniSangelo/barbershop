@@ -36,7 +36,6 @@ export class Customer {
 	@Column({ name: 'dtBirthDay', type: 'date', nullable: true })
 	birthDay: Date;
 
-	@OneToOne(() => User, (user) => user.id)
-	@JoinColumn({ name: 'nUserID' })
-	user: User;
+	@Column({ name: 'nUserID' })
+	userId: number;
 }

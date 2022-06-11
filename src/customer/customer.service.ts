@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { createQueryBuilder, Repository } from 'typeorm';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { Customer } from './entities/customer.entity';
@@ -18,14 +18,24 @@ export class CustomerService {
 		return;
 	}
 
-	findAll() {
-		return this.customerRepository.find();
+	async findAll() {
+		const customers = await createQueryBuilder('Customer', 'c')
+			.innerJoinAndSelect('User', 'u', 'c.userId = u.id')
+			.select(
+				'c.id, c.firstName, c.lastName, c.birthDay, c.phoneNumber, u.id AS user, u.email',
+			)
+			.getRawMany();
+		return customers;
 	}
 
 	async findOne(id: number) {
-		const customer = await this.customerRepository.findOne(id, {
-			relations: ['user'],
-		});
+		const customer = await createQueryBuilder('Customer', 'c')
+			.innerJoinAndSelect('User', 'u', 'c.userId = u.id')
+			.select(
+				'c.id, c.firstName, c.lastName, c.birthDay, c.phoneNumber, u.id AS user, u.email',
+			)
+			.where('c.id = :id', { id: id })
+			.getRawOne();
 		if (!customer) throw new NotFoundException(`Customer not found`);
 		return customer;
 	}
@@ -42,7 +52,7 @@ export class CustomerService {
 	}
 
 	async remove(id: number) {
-		const customer = await this.customerRepository.findOne(id);
+		const customer = await this.findOne(id);
 		if (!customer) throw new NotFoundException(`User not found`);
 		await this.customerRepository.remove(customer);
 		return;

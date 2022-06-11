@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { createQueryBuilder, Repository } from 'typeorm';
 import { CreateScheduledserviceDto } from './dto/create-scheduledservice.dto';
 import { UpdateScheduledserviceDto } from './dto/update-scheduledservice.dto';
 import { Scheduledservice } from './entities/scheduledservice.entity';

@@ -3,5 +3,5 @@ export class CreateBarberDto {
 	firstName: string;
 	lastName: string;
 	phoneNumber: string;
-	isActive: boolean;
+	isActive?: boolean;
 }
