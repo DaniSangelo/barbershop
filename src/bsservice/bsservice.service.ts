@@ -1,6 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { createQueryBuilder, Repository } from 'typeorm';
 import { CreateBsserviceDto } from './dto/create-bsservice.dto';
 import { UpdateBsserviceDto } from './dto/update-bsservice.dto';
 import { Bsservice } from './entities/bsservice.entity';
@@ -20,8 +20,18 @@ export class BsserviceService {
 		return;
 	}
 
-	findAll() {
-		return this.bsServiceRepository.find();
+	async findAll() {
+		try {
+			const bsService = await createQueryBuilder('Bsservice', 'bs')
+			.select(
+				'bs.serviceName, bs.serviceDescription, bs.price, bs.avgDuration',
+				)
+				.cache('services', 60000)
+				.getRawMany();
+			return bsService;
+		} catch (error) {
+			throw new BadRequestException(error.message);
+		}
 	}
 
 	findOne(id: number) {
