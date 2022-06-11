@@ -3,11 +3,11 @@ import { MessagesHelper } from 'src/helpers/messages.helpers';
 import { RegexHelper } from 'src/helpers/regex.helper';
 
 export class CreateUserDto {
-	// @IsNotEmpty()
-	// @IsEmail()
+	@IsNotEmpty()
+	@IsEmail()
 	email: string;
 
-	// @IsNotEmpty()
-	// @Matches(RegexHelper.password, { message: MessagesHelper.INVALID_PASSWORD })
+	@IsNotEmpty()
+	@Matches(RegexHelper.password, { message: MessagesHelper.INVALID_PASSWORD })
 	password: string;
 }
