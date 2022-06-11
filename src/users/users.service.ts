@@ -7,7 +7,7 @@ import {
 	UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
+import { getConnection, getManager, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -22,7 +22,6 @@ export class UserService {
 		private readonly userRepository: Repository<User>,
 		@Inject(forwardRef(() => AuthService))
 		private readonly authService: AuthService,
-		private connection: Connection,
 	) {}
 
 	async create(createUserDto: CreateUserDto) {
@@ -30,23 +29,17 @@ export class UserService {
 
 		if (userExists) throw new BadRequestException('User already exist');
 
-		const queryRunner = this.connection.createQueryRunner();
-		await queryRunner.connect();
-		await queryRunner.startTransaction();
-
-		try {
-			let user = this.userRepository.create(createUserDto);
-			user = await queryRunner.manager.save(user);
-			const customer = new Customer();
-			customer.user = user;
-			await queryRunner.manager.save(customer);
-			await queryRunner.commitTransaction();
-		} catch (error) {
-			await queryRunner.rollbackTransaction();
-			return error;
-		} finally {
-			await queryRunner.release();
-		}
+		await getManager().transaction(async (manager) => {
+			try {
+				let user = this.userRepository.create(createUserDto);
+				user = await manager.save(user);
+				const customer = new Customer();
+				customer.user = user;
+				await manager.save(customer);
+			} catch (error) {
+				throw new BadRequestException(error.message);
+			}
+		});
 
 		return;
 	}

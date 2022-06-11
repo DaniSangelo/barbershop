@@ -5,7 +5,7 @@ import { Bsservice } from 'src/bsservice/entities/bsservice.entity';
 import { CreateScheduledserviceDto } from 'src/scheduledservice/dto/create-scheduledservice.dto';
 import { Scheduledservice } from 'src/scheduledservice/entities/scheduledservice.entity';
 import { ScheduledserviceService } from 'src/scheduledservice/scheduledservice.service';
-import { Connection, EntityManager, Repository } from 'typeorm';
+import { getConnection, EntityManager, Repository, getManager } from 'typeorm';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { Appointment } from './entities/appointment.entity';
@@ -17,13 +17,9 @@ export class AppointmentService {
 		private readonly appointmentRepository: Repository<Appointment>,
 		private manager: EntityManager,
 		private readonly bsService: BsserviceService,
-		private readonly scheduledservice: ScheduledserviceService,
 	) {}
 
 	async create(createAppointmentDto: CreateAppointmentDto) {
-		let appointment =
-			this.appointmentRepository.create(createAppointmentDto);
-
 		let services =
 			createAppointmentDto.scheduledServices &&
 			(await Promise.all(
@@ -35,6 +31,9 @@ export class AppointmentService {
 		let totalDuration = services.reduce((acc, service) => {
 			return acc + service.avgDuration;
 		}, 0);
+
+		let appointment =
+			this.appointmentRepository.create(createAppointmentDto);
 
 		const isAvailable = await this.DateHourIsAvailable(
 			totalDuration,
@@ -48,25 +47,33 @@ export class AppointmentService {
 				'The chosen date and time are not available',
 			);
 
-		appointment = await this.appointmentRepository.save(appointment);
+		await getManager().transaction(async (manager) => {
+			try {
+				appointment = await manager.save(appointment);
 
-		services.forEach(async (service) => {
-			let scheduledservice = new Scheduledservice();
-			scheduledservice.appointment = appointment;
-			scheduledservice.barbershopService = service;
-			scheduledservice.fPrice = service.price;
+				const appointmentId = appointment.id;
 
-			await this.scheduledservice.create(scheduledservice);
+				services.forEach(async (service) => {
+					let scheduledservice = new Scheduledservice();
+					scheduledservice.appointmentId = appointmentId;
+					scheduledservice.barbershopServiceId = service.id;
+					scheduledservice.fPrice = service.price;
+					await manager.save(scheduledservice);
+				});
+			} catch (error) {
+				throw new BadRequestException(error.message);
+			}
 		});
+
 		return;
 	}
 
-	findAll() {
-		return `This action returns all appointment`;
-	}
-
-	findOne(id: number) {
-		return `This action returns a #${id} appointment`;
+	async findAppointmentsByDate(appointmentDate: string) {
+		return this.appointmentRepository.find({
+			where: {
+				dtAppointment: appointmentDate,
+			},
+		});
 	}
 
 	update(id: number, updateAppointmentDto: UpdateAppointmentDto) {

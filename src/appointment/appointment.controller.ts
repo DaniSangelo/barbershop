@@ -20,14 +20,9 @@ export class AppointmentController {
 		return this.appointmentService.create(createAppointmentDto);
 	}
 
-	@Get()
-	findAll() {
-		return this.appointmentService.findAll();
-	}
-
-	@Get(':id')
-	findOne(@Param('id') id: string) {
-		return this.appointmentService.findOne(+id);
+	@Get(':appointmentDate')
+	findAppointmentsByDate(@Param('appointmentDate') appointmentDate: string) {
+		return this.appointmentService.findAppointmentsByDate(appointmentDate);
 	}
 
 	@Patch(':id')
