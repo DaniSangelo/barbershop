@@ -15,17 +15,11 @@ export class Scheduledservice {
 	@PrimaryGeneratedColumn({ name: 'nScheduledServiceID', type: 'int' })
 	id: number;
 
-	@ManyToOne(
-		() => Appointment,
-		(appointment) => appointment.scheduledService,
-		{ cascade: true },
-	)
-	@JoinColumn({ name: 'nAppointmentID' })
-	appointment: Appointment;
+	@Column({ name: 'nAppointmentID' })
+	appointmentId: number;
 
-	@ManyToOne(() => Bsservice, (bsservice) => bsservice.scheduledService)
-	@JoinColumn({ name: 'nBarbershopServiceID' })
-	barbershopService: Bsservice;
+	@Column({ name: 'nBarbershopServiceID' })
+	barbershopServiceId: number;
 
 	@Column({ name: 'fPrice', type: 'decimal', precision: 5 })
 	fPrice: number;
