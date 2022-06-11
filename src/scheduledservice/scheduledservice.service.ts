@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateScheduledserviceDto } from './dto/create-scheduledservice.dto';
@@ -16,19 +16,12 @@ export class ScheduledserviceService {
 		return this.scheduledServiceRepository.save(createScheduledserviceDto);
 	}
 
-	findAll() {
-		return `This action returns all scheduledservice`;
-	}
+	async remove(id: number) {
+		const scheduledService = await this.scheduledServiceRepository.findOne(
+			id,
+		);
+		if (!scheduledService) throw new NotFoundException('Scheduled service not found');
 
-	findOne(id: number) {
-		return `This action returns a #${id} scheduledservice`;
-	}
-
-	update(id: number, updateScheduledserviceDto: UpdateScheduledserviceDto) {
-		return `This action updates a #${id} scheduledservice`;
-	}
-
-	remove(id: number) {
-		return `This action removes a #${id} scheduledservice`;
+		return this.scheduledServiceRepository.remove(scheduledService);
 	}
 }

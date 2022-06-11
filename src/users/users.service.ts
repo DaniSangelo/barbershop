@@ -3,17 +3,19 @@ import {
 	forwardRef,
 	Inject,
 	Injectable,
+	InternalServerErrorException,
 	NotFoundException,
 	UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection, getManager, Repository } from 'typeorm';
+import { getManager, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import * as genHash from '../helpers/generateHash.helper';
 import { AuthService } from 'src/auth/auth.service';
 import { Customer } from 'src/customer/entities/customer.entity';
+import { dateNowHelper } from 'src/helpers/utils.helper';
 
 @Injectable()
 export class UserService {
@@ -37,7 +39,7 @@ export class UserService {
 				customer.user = user;
 				await manager.save(customer);
 			} catch (error) {
-				throw new BadRequestException(error.message);
+				throw new InternalServerErrorException(error.message);
 			}
 		});
 
@@ -82,14 +84,10 @@ export class UserService {
 		const user = await this.userRepository.findOne(id);
 		if (!user) throw new NotFoundException(`User not found`);
 
-		user.deletedAt = this.dtNow();
+		user.deletedAt = dateNowHelper.now;
 		await this.userRepository.save(user);
 
 		return;
-	}
-
-	private dtNow() {
-		return new Date();
 	}
 
 	async saveToken(userId: number, token: string) {
