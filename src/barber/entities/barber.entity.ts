@@ -19,7 +19,4 @@ export class Barber {
 
 	@Column({ name: 'bIsActive', type: 'tinyint' })
 	isActive: boolean;
-
-	@OneToMany(() => Appointment, (appointment) => appointment.barber)
-	appointments: Appointment[];
 }

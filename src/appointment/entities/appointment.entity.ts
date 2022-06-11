@@ -15,14 +15,6 @@ export class Appointment {
 	@PrimaryGeneratedColumn({ name: 'nAppointmentID', type: 'int' })
 	id: number;
 
-	@ManyToOne(() => Customer, (customer) => customer.appointments)
-	@JoinColumn({ name: 'nCustomerID' })
-	customer: Customer;
-
-	@ManyToOne(() => Barber, (barber) => barber.appointments)
-	@JoinColumn({ name: 'nBarberID' })
-	barber: Barber;
-
 	@Column({ name: 'nCustomerID', type: 'int' })
 	customerId: number;
 
