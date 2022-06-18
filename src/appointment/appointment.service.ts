@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { BsserviceService } from 'src/bsservice/bsservice.service';
 import { Bsservice } from 'src/bsservice/entities/bsservice.entity';
+import { SendMailProducerService } from 'src/jobs/sendMail-producer-service';
 import { Scheduledservice } from 'src/scheduledservice/entities/scheduledservice.entity';
 import {
 	EntityManager,
@@ -26,6 +27,7 @@ export class AppointmentService {
 		private manager: EntityManager,
 		private readonly bsService: BsserviceService,
 		private readonly mailService: MailerService,
+		private readonly sendMailService: SendMailProducerService,
 	) {}
 
 	async create(createAppointmentDto: CreateAppointmentDto) {
@@ -69,13 +71,7 @@ export class AppointmentService {
 					scheduledservice.price = service.price;
 					await manager.save(scheduledservice);
 				});
-				// TODO: remove hardcoded
-				await this.mailService.sendMail({
-					to: 'shaka.virgem@cz.mail.com',
-					from: 'BarberShop <barbershop@mail.com>',
-					subject: 'Your time has been scheduled',
-					text: 'Hello, Daniel. Your time has been scheduled.',
-				});
+				this.sendMailService.sendMail('');
 			} catch (error) {
 				throw new BadRequestException(error.message);
 			}
@@ -103,7 +99,7 @@ export class AppointmentService {
 					'bs.id = sc.barbershopServiceId',
 				)
 				.select(
-					'b.firstName, b.lastName, b.phoneNumber, a.dtAppointment, a.dtHourAppointment, bs.serviceName, bs.avgDuration as duracao',
+					'a.id, b.firstName, b.lastName, b.phoneNumber, a.dtAppointment, a.dtHourAppointment, bs.serviceName, bs.avgDuration as duracao, c.firstName AS customer',
 				)
 				.where('a.dtAppointment = :dtAppointment', {
 					dtAppointment: appointmentDate,

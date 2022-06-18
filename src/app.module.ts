@@ -12,6 +12,8 @@ import { AppointmentModule } from './appointment/appointment.module';
 import { ScheduledserviceModule } from './scheduledservice/scheduledservice.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { BullModule } from '@nestjs/bull/dist/bull.module';
+import { SendMailProducerService } from './jobs/sendMail-producer-service';
+import { SendMailConsumer } from './jobs/sendMail-consumer';
 
 @Module({
 	imports: [
@@ -22,6 +24,9 @@ import { BullModule } from '@nestjs/bull/dist/bull.module';
 				host: process.env.REDIS_HOST,
 				port: +process.env.REDIS_PORT,
 			},
+		}),
+		BullModule.registerQueue({
+			name: 'sendEmail-queue',
 		}),
 		MailerModule.forRoot({
 			transport: {
@@ -42,6 +47,6 @@ import { BullModule } from '@nestjs/bull/dist/bull.module';
 		ScheduledserviceModule,
 	],
 	controllers: [AppController],
-	providers: [AppService],
+	providers: [SendMailProducerService, AppService, SendMailConsumer],
 })
 export class AppModule {}

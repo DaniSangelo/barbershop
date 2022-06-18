@@ -8,6 +8,7 @@ import { Request, Response } from 'express';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
+	//TODO: improve error handling
 	catch(exception: any, host: ArgumentsHost) {
 		const ctx = host.switchToHttp();
 		const response = ctx.getResponse<Response>();
@@ -18,7 +19,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
 		let status = exception.getStatus();
 
 		if (exception?.query !== undefined) {
-			console.log('aqui')
 			error = {
 				error: exception.originalError.info,
 				query: exception.query,
