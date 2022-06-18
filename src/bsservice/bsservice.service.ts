@@ -40,12 +40,16 @@ export class BsserviceService {
 	}
 
 	async findOne(id: number) {
-		const bsService = await createQueryBuilder('Bsservice', 'bs')
-			.select(
-				'bs.id, bs.serviceName, bs.serviceDescription, bs.price, bs.avgDuration',
-			)
-			.where('bs.id = :id', { id: id })
-			.getRawOne();
+		// usar o querybuilder estava fazendo com que as propriedades do serviço lá no appointment.service
+		// ficassem como undefined e, portanto, quebrando a aplicação.
+		// colocar um console.log em services.reduce em appointment.service.ts
+		// const bsService = await createQueryBuilder('Bsservice', 'bs')
+		// 	.select(
+		// 		'bs.id, bs.serviceName, bs.serviceDescription, bs.price, bs.avgDuration',
+		// 	)
+		// 	.where('bs.id = :id', { id: id })
+		// 	.getRawOne();
+		const bsService = await this.bsServiceRepository.findOne(id);
 		return bsService;
 	}
 

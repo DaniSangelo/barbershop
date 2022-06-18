@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import {
 	BadRequestException,
 	Injectable,
@@ -6,11 +7,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { BsserviceService } from 'src/bsservice/bsservice.service';
 import { Bsservice } from 'src/bsservice/entities/bsservice.entity';
-import { CreateScheduledserviceDto } from 'src/scheduledservice/dto/create-scheduledservice.dto';
 import { Scheduledservice } from 'src/scheduledservice/entities/scheduledservice.entity';
-import { ScheduledserviceService } from 'src/scheduledservice/scheduledservice.service';
 import {
-	getConnection,
 	EntityManager,
 	Repository,
 	getManager,
@@ -27,10 +25,11 @@ export class AppointmentService {
 		private readonly appointmentRepository: Repository<Appointment>,
 		private manager: EntityManager,
 		private readonly bsService: BsserviceService,
+		private readonly mailService: MailerService,
 	) {}
 
 	async create(createAppointmentDto: CreateAppointmentDto) {
-		let services =
+		let services: any =
 			createAppointmentDto.scheduledServices &&
 			(await Promise.all(
 				createAppointmentDto.scheduledServices.map((service) =>
@@ -69,6 +68,13 @@ export class AppointmentService {
 					scheduledservice.barbershopServiceId = service.id;
 					scheduledservice.price = service.price;
 					await manager.save(scheduledservice);
+				});
+				// TODO: remove hardcoded
+				await this.mailService.sendMail({
+					to: 'shaka.virgem@cz.mail.com',
+					from: 'BarberShop <barbershop@mail.com>',
+					subject: 'Your time has been scheduled',
+					text: 'Hello, Daniel. Your time has been scheduled.',
 				});
 			} catch (error) {
 				throw new BadRequestException(error.message);
@@ -143,7 +149,7 @@ export class AppointmentService {
 		const service = await this.bsService.findOne(id);
 
 		if (service) {
-			return service;
+			return service as Bsservice;
 		}
 		return;
 	}
